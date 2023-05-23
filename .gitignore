@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Python
+.env
+.idea
+build
+cmake-build-debug
+**__pycache__
+**.pyd
