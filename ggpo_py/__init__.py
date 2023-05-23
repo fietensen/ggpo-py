@@ -72,4 +72,3 @@ class GGPOEvent:
     total: int
     frames_ahead: int
     disconnect_timeout: int
-
