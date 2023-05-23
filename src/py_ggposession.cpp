@@ -126,6 +126,8 @@ bool __cdecl _cbk_advance_frame(int)
 bool __cdecl _cbk_load_game_state(unsigned char *buffer, int len)
 {
     ggpo_session->_game_state = ggpo_session->util_ref_to_pygamestate(buffer, len);
+
+    PyObject_Call(ggpo_session->py_callbacks.on_rollback, py::make_tuple(ggpo_session->_game_state).ptr(), NULL);
     return true;
 }
 
@@ -219,6 +221,13 @@ void PyGGPOSession::py_cbk_on_event(py::function &func)
     Py_INCREF(func.ptr());
 }
 
+void PyGGPOSession::py_cbk_on_rollback(py::function &func)
+{
+    py_callbacks.on_rollback_def = true;
+    py_callbacks.on_rollback = func.ptr();
+    Py_INCREF(func.ptr());
+}
+
 PyGGPOSession::~PyGGPOSession()
 {
     if (_session_running) {
@@ -229,6 +238,8 @@ PyGGPOSession::~PyGGPOSession()
             Py_DECREF(py_callbacks.advance_frame);
         if (py_callbacks.log_game_state_def)
             Py_DECREF(py_callbacks.log_game_state);
+        if (py_callbacks.on_rollback_def)
+            Py_DECREF(py_callbacks.on_rollback);
     }
 }
 
@@ -238,6 +249,8 @@ py::object PyGGPOSession::start(void)
         throw std::runtime_error("Session is already running.");
     if (!py_callbacks.advance_frame_def)
         throw std::runtime_error("advance_frame callback not defined.");
+    if (!py_callbacks.on_rollback_def)
+        throw std::runtime_error("on_rollback callback not defined.");
 
      int errorcode = ggpo_start_session(
             &this->_ggpo,

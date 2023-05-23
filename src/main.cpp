@@ -27,5 +27,6 @@ PYBIND11_MODULE(ggpo_py, m) {
             .def("advance_frame", &PyGGPOSession::advance_frame)
             .def("add_local_input", &PyGGPOSession::add_local_input)
             .def("idle", &PyGGPOSession::idle)
-            .def("synchronize_input", &PyGGPOSession::synchronize_input);
+            .def("synchronize_input", &PyGGPOSession::synchronize_input)
+            .def("cbk_on_rollback", &PyGGPOSession::py_cbk_on_rollback);
 }

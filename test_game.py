@@ -53,6 +53,10 @@ class Game:
         self.opponent = None
 
 
+    def rollback(self, state):
+        self.game_state = state
+
+
     def cbk_advance_frame(self, all_inputs, disconnected_players):
         self.advance_frame(all_inputs)
 
@@ -81,7 +85,7 @@ class Game:
 
     def _add_player(self, player):
         self.net_session.add_player(player)
-        err = self.net_session.set_frame_delay(player, 6)
+        err = self.net_session.set_frame_delay(player, 0)
         if err != ggpo_py.GGPOErrorCode.GGPO_ERRORCODE_SUCCESS:
             raise Exception("Failed to initialize Player: {}".format(err))
         
@@ -94,6 +98,7 @@ class Game:
 
     def init_network(self, own_player_num:int):
         self.net_session.cbk_advance_frame(self.cbk_advance_frame)
+        self.net_session.cbk_on_rollback(self.rollback)
         self.net_session.cbk_on_event(self.cbk_on_event)
 
         self.net_session.start()

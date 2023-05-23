@@ -29,6 +29,9 @@ typedef struct PyGGPOCallbacks {
     // required callbacks
     PyObject *advance_frame;
     bool advance_frame_def = false;
+
+    PyObject *on_rollback;
+    bool on_rollback_def = false;
 } PyGGPOCallbacks;
 
 class PyGGPOSession {
@@ -66,6 +69,7 @@ public:
     void py_cbk_advance_frame(py::function&);
     void py_cbk_log_game_state(py::function&);
     void py_cbk_on_event(py::function&);
+    void py_cbk_on_rollback(py::function&);
 
     // ggpo function wrapper
     py::object add_player(py::object);
