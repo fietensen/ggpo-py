@@ -3,7 +3,6 @@
 #include <vector>
 #include <pybind11/pybind11.h>
 #include "ggponet.h"
-#include "backends/backend.h"
 
 namespace py = pybind11;
 
