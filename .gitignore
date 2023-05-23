@@ -34,7 +34,9 @@
 # Python
 .env
 .idea
+.vscode
 build
 cmake-build-debug
 **__pycache__
 **.pyd
+**stubs

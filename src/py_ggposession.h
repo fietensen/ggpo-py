@@ -6,56 +6,78 @@
 
 namespace py = pybind11;
 
+typedef py::object PyGGPOErrorCode;
+
+// callbacks
+bool __cdecl _cbk_begin_game(const char*);
+bool __cdecl _cbk_advance_frame(int);
+bool __cdecl _cbk_load_game_state(unsigned char*, int);
+bool __cdecl _cbk_save_game_state(unsigned char**, int*, int*, int);
+bool __cdecl _cbk_log_game_state(char*,unsigned char*,int);
+void __cdecl _cbk_free_buffer(void*);
+bool __cdecl _cbk_on_event(GGPOEvent*);
+
+
 typedef struct PyGGPOCallbacks {
-    py::function &on_event;
-    py::function &advance_frame;
-    py::function &free_buffer;
-    py::function &load_game_state;
-    py::function &save_game_state;
-    py::function &log_game_state;
+    // optional callbacks
+    PyObject *on_event;
+    PyObject *log_game_state;
 
     bool on_event_def = false;
-    bool advance_frame_def = false;
-    bool free_buffer_def = false;
-    bool load_game_state_def = false;
-    bool save_game_state_def = false;
     bool log_game_state_def = false;
+
+    // required callbacks
+    PyObject *advance_frame;
+    bool advance_frame_def = false;
 } PyGGPOCallbacks;
 
 class PyGGPOSession {
-    GGPOSession *_ggpo;
-    GGPOSessionCallbacks *_ggpo_callbacks;
+public:
+    PyGGPOSession(const char*, unsigned short, int, py::object);
+    ~PyGGPOSession();
 
-    PyGGPOCallbacks *py_callbacks;
+    py::object start(void);
+    py::object stop(void);
+
+    GGPOSession *_ggpo;
+    GGPOSessionCallbacks _ggpo_callbacks;
+
+    py::object *_py_players;
+    GGPOPlayer *_ggpo_players;
+    GGPOPlayerHandle *_ggpo_playerhandles;
+
+    py::object _game_state;
+
+    PyGGPOCallbacks py_callbacks;
 
     const char *_game_title;
     int _game_players;
     unsigned short _game_port;
     bool _session_running = false;
 
-    bool __cdecl _cbk_begin_game(const char*);
-    void _cbk_advance_frame(void);
-    void _cbk_load_game_state(void);
-    void _cbk_save_game_state(void);
-    void _cbk_log_game_state(void);
-    void _cbk_free_buffer(void);
-    void _cbk_on_event(void);
 
-public:
-    PyGGPOSession(const char*, int, unsigned short);
-    ~PyGGPOSession();
+    py::object util_player_by_ggpoplayerhandle(GGPOPlayerHandle);
+    py::object util_ref_to_pygamestate(void*,int);
 
-    py::object start(void);
-    py::object stop(void);
+    GGPOPlayerHandle util_ggpoplayerhandle_by_player(py::object);
+    py::bytes util_pygamestate_to_str(py::object);
 
     // callback setter functions
-    void py_cbk_begin_game(py::function &func);
-    void py_cbk_advance_frame(py::function &func);
-    void py_cbk_load_game_state(py::function &func);
-    void py_cbk_save_game_state(py::function &func);
-    void py_cbk_log_game_state(py::function &func);
-    void py_cbk_free_buffer(py::function&);
+    void py_cbk_advance_frame(py::function&);
+    void py_cbk_log_game_state(py::function&);
     void py_cbk_on_event(py::function&);
+
+    // ggpo function wrapper
+    py::object add_player(py::object);
+    PyGGPOErrorCode set_disconnect_timeout(int);
+    PyGGPOErrorCode set_disconnect_notify_start(int);
+    PyGGPOErrorCode set_frame_delay(py::object, int);
+    PyGGPOErrorCode disconnect_player(py::object);
+    PyGGPOErrorCode advance_frame();
+    PyGGPOErrorCode add_local_input(py::object, int);
+    PyGGPOErrorCode idle(int);
+    py::tuple synchronize_input();
+
 };
 
 #endif //GGPO_PY_PY_GGPOSESSION_H

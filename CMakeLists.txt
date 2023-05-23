@@ -13,6 +13,8 @@ add_subdirectory(ggpo)
 
 set(CMAKE_CXX_STANDARD 17)
 find_package(Python 3.11 COMPONENTS Interpreter Development REQUIRED)
+add_definitions(-DPYBIND11_EXCEPTIONS)
+
 pybind11_add_module(ggpo_py src/main.cpp src/py_ggposession.cpp)
 
 if(WIN32)
