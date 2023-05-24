@@ -84,16 +84,20 @@ class Game:
 
 
     def _add_player(self, player):
-        self.net_session.add_player(player)
-        err = self.net_session.set_frame_delay(player, 0)
+        err = self.net_session.add_player(player)
         if err != ggpo_py.GGPOErrorCode.GGPO_ERRORCODE_SUCCESS:
             raise Exception("Failed to initialize Player: {}".format(err))
+        
+        err = self.net_session.set_frame_delay(player, 0)
+        if err != ggpo_py.GGPOErrorCode.GGPO_ERRORCODE_SUCCESS:
+            raise Exception("Failed to set frame delay: {}".format(err))
         
 
     def _add_opponent(self, opponent):
         err = self.net_session.add_player(opponent)
         if err != ggpo_py.GGPOErrorCode.GGPO_ERRORCODE_SUCCESS:
             raise Exception("Failed to initialize Player: {}".format(err))
+
 
 
     def init_network(self, own_player_num:int):
